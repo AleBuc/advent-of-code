@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-class Scratch {
+class Advent0402 {
     public static void main(String[] args) {
 /*        String code = """
                 Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
@@ -218,7 +218,6 @@ class Scratch {
             cards.add(mapCard(line));
         }
 
-//        Iterator<Card> cardIterator = cards.iterator();
         for (int i = 0; i < cards.size(); i++) {
             List<Card> cardArray = cards.stream().sorted(cardComparator).toList();
             Card card = cardArray.get(i);
@@ -237,9 +236,6 @@ class Scratch {
             }
 
         }
-//        while(cardIterator.hasNext()){
-//
-//        }
         Map<String, Integer> cardsCountById = cards.stream()
                 .collect(Collectors.toMap(
                         card -> card.id,

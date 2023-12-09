@@ -1,29 +1,29 @@
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 
-class Scratch {
+class Advent0801 {
     public static void main(String[] args) {
-        String input = """
-                LRLRLRLRLRLRLRLRLRLRLRLRLRLR
+/*        String input = """
+                RL
                                 
-                11A = (11B, XXX)
-                11B = (XXX, 11Z)
-                11Z = (11B, XXX)
-                22A = (22B, XXX)
-                22B = (22C, 22C)
-                22C = (22Z, 22Z)
-                22Z = (22B, 22B)
-                XXX = (XXX, XXX)""";
-        /*String input = """
+                AAA = (BBB, CCC)
+                BBB = (DDD, EEE)
+                CCC = (ZZZ, GGG)
+                DDD = (DDD, DDD)
+                EEE = (EEE, EEE)
+                GGG = (GGG, GGG)
+                ZZZ = (ZZZ, ZZZ)""";*/
+/*        String input = """
+                LLR
+                                
+                AAA = (BBB, BBB)
+                BBB = (AAA, ZZZ)
+                ZZZ = (ZZZ, ZZZ)""";*/
+        String input = """
                 LRRLRRRLLRRLRRLRRRLRLRRLRRLRRRLRRRLRRLRLLRRLRLRRLRRLRLRLRRLRRLRRRLLRLLRRLRLRRRLRRRLLRRRLRRLRLLRRLRRRLRLLRLRLLRRRLRLRRRLLRRRLRRRLRRLLRLRLLRRLRRLLRRRLLRLLRRLRRRLRLRRRLRLRRLRLRLRRLRRLRRLLLRRRLRLRLLLRRRLLRLRRLRRRLRRLRRLRRRLRRRLRRLLRLLRRLRRRLLRRRLRLRLRRRLRRRLRRLRRLRLLRLRRLLRRLLRRRR
-
+                                
                 LRV = (NNC, BHD)
                 KBR = (MLH, XGR)
                 BJB = (RCR, LBC)
@@ -809,7 +809,7 @@ class Scratch {
                 BPN = (GJX, TRT)
                 RLL = (XMT, RKV)
                 CJT = (VBG, NTD)
-                MQV = (LTF, KKG)""";*/
+                MQV = (LTF, KKG)""";
         String[] lines = input.split("\n");
         String sequence = lines[0];
         char[] sequenceChars = sequence.toCharArray();
@@ -819,49 +819,30 @@ class Scratch {
             Map.Entry<String, Instruction> instructionEntry = mapInstruction(line);
             instructionMap.put(instructionEntry.getKey(), instructionEntry.getValue());
         }
-
-        Map<String, Instruction> nodes = new HashMap<>(instructionMap.entrySet().stream()
-                .filter(entry -> entry.getKey().charAt(entry.getKey().length() - 1) == 'A')
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        final int nodesToCompute = nodes.size();
+        String actualNode = "AAA";
         long count = 0;
-        int zCount = 0;
         do {
+            String nextNode = null;
             for (char character : sequenceChars) {
-                Map<String, Instruction> newNodes = new HashMap<>();
-                zCount=0;
-                for (Map.Entry<String, Instruction> instructionEntry : nodes.entrySet()) {
-                    Map.Entry<String, Instruction> newInstruction = getNextNode(character, instructionEntry, instructionMap);
-                    newNodes.put(newInstruction.getKey(), newInstruction.getValue());
-                    if (newInstruction.getKey().charAt(2) == 'Z'){
-                        zCount++;
-                    }
+                Instruction instruction = instructionMap.get(actualNode);
+                if (character == 'L') {
+                    nextNode = instruction.getLeft();
                 }
-                nodes = newNodes;
+                if (character == 'R') {
+                    nextNode = instruction.getRight();
+                }
                 count++;
-
-                if (zCount == nodesToCompute) {
+                actualNode = nextNode;
+                System.out.println(nextNode);
+                if ("ZZZ".equals(nextNode)) {
                     break;
                 }
             }
-            System.out.println(count);
-        } while (zCount != nodesToCompute);
-        System.out.println(nodes.keySet());
+
+        } while (!"ZZZ".equals(actualNode));
+
         System.out.println(count);
 
-
-    }
-
-    private static Map.Entry<String, Instruction> getNextNode(char sequenceChar, Map.Entry<String, Instruction> instructionEntry, Map<String, Instruction> instructionMap) {
-        String nextNodeKey = "";
-        Instruction instruction = instructionEntry.getValue();
-        if (sequenceChar == 'L') {
-            nextNodeKey = instruction.getLeft();
-        }
-        if (sequenceChar == 'R') {
-            nextNodeKey = instruction.getRight();
-        }
-        return Map.entry(nextNodeKey, instructionMap.get(nextNodeKey));
 
     }
 
@@ -894,9 +875,9 @@ class Scratch {
         @Override
         public String toString() {
             return "Instruction{" +
-                   "left='" + left + '\'' +
-                   ", right='" + right + '\'' +
-                   '}';
+                    "left='" + left + '\'' +
+                    ", right='" + right + '\'' +
+                    '}';
         }
     }
 

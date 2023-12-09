@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-class Scratch {
+class Advent0202 {
     public static void main(String[] args) {
         String inventory = """
                 Game 1: 2 blue, 3 red; 3 green, 3 blue, 6 red; 4 blue, 6 red; 2 green, 2 blue, 9 red; 2 red, 4 blue
@@ -109,28 +109,34 @@ class Scratch {
         for (String line : lines) {
             mappedLines.add(mapTheLine(line));
         }
-        int givenRed = Integer.parseInt(args[0]);
-        int givenGreen = Integer.parseInt(args[1]);
-        int givenBlue = Integer.parseInt(args[2]);
 
-        List<String> filteredIdList = mappedLines.stream()
-                .filter(line -> line.getDetails().stream()
-                                .allMatch(detail -> detail.getRed() <= givenRed && detail.getGreen() <= givenGreen && detail.getBlue() <= givenBlue)
-//                        {
-//                    int red = (int) map.get("red");
-//                    int green = (int) map.get("green");
-//                    int blue = (int) map.get("blue");
-//                    return red <= givenRed && green <= givenGreen && blue <= givenBlue;
-//                }
+        List<Detail> maxDetailList = mappedLines.stream()
+                .map(line -> {
+                    Detail maxDetail = new Detail(0,0,0);
+                            for (Detail detail : line.details) {
+                                if (detail.getRed() > maxDetail.getRed()){
+                                    maxDetail.setRed(detail.getRed());
+                                }
+                                if (detail.getGreen() > maxDetail.getGreen()){
+                                    maxDetail.setGreen(detail.getGreen());
+                                }
+                                if (detail.getBlue() > maxDetail.getBlue()){
+                                    maxDetail.setBlue(detail.getBlue());
+                                }
+                            }
+                            return maxDetail;
+                        }
                 )
-                .map(Line::getId)
                 .toList();
 
-        Integer sum = filteredIdList.stream()
-                .map(Integer::parseInt)
-                .reduce(0, Integer::sum);
+        List<Long> powerList = maxDetailList.stream()
+                .map(detail -> (long) detail.getRed() * (long) detail.getGreen() * (long) detail.getBlue())
+                .toList();
 
-        System.out.println(filteredIdList);
+        Long sum = powerList.stream()
+                .reduce(0L, Long::sum);
+
+        System.out.println(powerList);
         System.out.println(sum);
     }
 
@@ -143,7 +149,7 @@ class Scratch {
         String[] definitionDetails = definition.split(";");
         List<Detail> details = new ArrayList<>();
         for (String detailString : definitionDetails) {
-            Detail detail = new Detail();
+            Detail detail = new Detail(0,0,0);
             String[] colorDetails = detailString.split(",");
             for (String colorDetail : colorDetails) {
                 String detailNumber = colorDetail.replaceAll("[^\\d.]", "");
@@ -188,6 +194,12 @@ class Scratch {
         private int red;
         private int green;
         private int blue;
+
+        public Detail(int red, int green, int blue) {
+            this.red = red;
+            this.green = green;
+            this.blue = blue;
+        }
 
         public int getRed() {
             return red;

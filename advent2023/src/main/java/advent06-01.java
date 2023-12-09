@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class Scratch {
+class Advent0601 {
     public static void main(String[] args) {
         /*String input = """
                 Time:      7  15   30

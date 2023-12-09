@@ -1,4 +1,4 @@
-class Scratch {
+class Advent0602 {
     public static void main(String[] args) {
 /*        String input = """
                 Time:      71530
@@ -13,8 +13,6 @@ class Scratch {
 
         Race personalBest = getPersonalBest(new Race(time, distance));
         System.out.println(personalBest);
-//        int score = personalBest.stream().map(Race::getDistance).reduce(1, (integer, integer2) -> integer * integer2);
-//        System.out.println(score);
 
     }
 

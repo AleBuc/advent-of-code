@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class Scratch {
+class Advent0302 {
     public static void main(String[] args) {
 /*        String schema = """
                 467..114..
@@ -195,7 +195,7 @@ class Scratch {
         List< Map.Entry<Symbol, List<Number>>> entriesToMultiply = map.entrySet().stream()
                 .filter(symbolListEntry -> symbolListEntry.getKey().symbol == '*' && symbolListEntry.getValue().size() == 2)
                 .toList();
-        int sum = entriesToMultiply.stream().map(entry -> entry.getValue().stream().map(number -> number.getNumber()).reduce(1, (integer, integer2) -> integer*integer2)).reduce(0, Integer::sum);
+        int sum = entriesToMultiply.stream().map(entry -> entry.getValue().stream().map(Number::getNumber).reduce(1, (integer, integer2) -> integer*integer2)).reduce(0, Integer::sum);
 
         System.out.println(entriesToMultiply);
         System.out.println(sum);

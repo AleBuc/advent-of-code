@@ -1,16 +1,14 @@
-import org.apache.commons.lang3.StringUtils;
-
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 
-class Scratch {
+class Advent0802b {
     public static void main(String[] args) {
-        String input = """
+        /*String input = """
                 LRLRLRLRLRLRLRLRLRLRLRLRLRLR
                                 
                 11A = (11B, XXX)
@@ -20,10 +18,10 @@ class Scratch {
                 22B = (22C, 22C)
                 22C = (22Z, 22Z)
                 22Z = (22B, 22B)
-                XXX = (XXX, XXX)""";
-        /*String input = """
+                XXX = (XXX, XXX)""";*/
+        String input = """
                 LRRLRRRLLRRLRRLRRRLRLRRLRRLRRRLRRRLRRLRLLRRLRLRRLRRLRLRLRRLRRLRRRLLRLLRRLRLRRRLRRRLLRRRLRRLRLLRRLRRRLRLLRLRLLRRRLRLRRRLLRRRLRRRLRRLLRLRLLRRLRRLLRRRLLRLLRRLRRRLRLRRRLRLRRLRLRLRRLRRLRRLLLRRRLRLRLLLRRRLLRLRRLRRRLRRLRRLRRRLRRRLRRLLRLLRRLRRRLLRRRLRLRLRRRLRRRLRRLRRLRLLRLRRLLRRLLRRRR
-
+                                
                 LRV = (NNC, BHD)
                 KBR = (MLH, XGR)
                 BJB = (RCR, LBC)
@@ -809,7 +807,7 @@ class Scratch {
                 BPN = (GJX, TRT)
                 RLL = (XMT, RKV)
                 CJT = (VBG, NTD)
-                MQV = (LTF, KKG)""";*/
+                MQV = (LTF, KKG)""";
         String[] lines = input.split("\n");
         String sequence = lines[0];
         char[] sequenceChars = sequence.toCharArray();
@@ -823,31 +821,37 @@ class Scratch {
         Map<String, Instruction> nodes = new HashMap<>(instructionMap.entrySet().stream()
                 .filter(entry -> entry.getKey().charAt(entry.getKey().length() - 1) == 'A')
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        final int nodesToCompute = nodes.size();
-        long count = 0;
-        int zCount = 0;
-        do {
-            for (char character : sequenceChars) {
-                Map<String, Instruction> newNodes = new HashMap<>();
-                zCount=0;
-                for (Map.Entry<String, Instruction> instructionEntry : nodes.entrySet()) {
-                    Map.Entry<String, Instruction> newInstruction = getNextNode(character, instructionEntry, instructionMap);
-                    newNodes.put(newInstruction.getKey(), newInstruction.getValue());
-                    if (newInstruction.getKey().charAt(2) == 'Z'){
-                        zCount++;
+        Map<String, List<Summit>> analysisData = new HashMap<>();
+
+        for (Map.Entry<String, Instruction> nodeEntry : nodes.entrySet()) {
+            long count = 0;
+            long cycle = 0;
+            List<Summit> summitList = new ArrayList<>();
+            Map.Entry<String, Instruction> actualNode = nodeEntry;
+            do {
+                for (int i = 0; i < sequenceChars.length; i++) {
+                    char character = sequenceChars[i];
+                    Map.Entry<String, Instruction> newInstruction = getNextNode(character, actualNode, instructionMap);
+                    actualNode = Map.entry(newInstruction.getKey(), newInstruction.getValue());
+                    count++;
+                    if (newInstruction.getKey().charAt(2) == 'Z') {
+                        Summit summit = new Summit(newInstruction.getKey(), cycle, i, count);
+                        if (summitList.stream().anyMatch(summit1 -> summit1.sequenceIndex == summit.sequenceIndex)) {
+                            summitList.add(summit);
+                            break;
+                        }
+                        summitList.add(summit);
                     }
+
+
                 }
-                nodes = newNodes;
-                count++;
-                
-                if (zCount == nodesToCompute) {
-                    break;
-                }
-            }
-            System.out.println(count);
-        } while (zCount != nodesToCompute);
-        System.out.println(nodes.keySet());
-        System.out.println(count);
+                cycle++;
+            } while (summitList.stream().filter(summit1 -> summit1.sequenceIndex == summitList.getLast().sequenceIndex).count() < 2);
+            analysisData.put(nodeEntry.getKey(), summitList);
+        }
+
+        long lcm = lcm(analysisData.values().stream().map(summits -> summits.getFirst().sequenceNbr).toList());
+        System.out.println("Result: " + lcm);
 
 
     }
@@ -873,6 +877,24 @@ class Scratch {
         return entry(id, instruction);
     }
 
+    private static long gcd(long a, long b) {
+        while (b > 0) {
+            long temp = b;
+            b = a % b; // % is remainder
+            a = temp;
+        }
+        return a;
+    }
+
+    private static long lcm(long a, long b) {
+        return a * (b / gcd(a, b));
+    }
+
+    private static long lcm(List<Long> input) {
+        long result = input.get(0);
+        for (int i = 1; i < input.size(); i++) result = lcm(result, input.get(i));
+        return result;
+    }
 
     static class Instruction {
         private final String left;
@@ -894,9 +916,51 @@ class Scratch {
         @Override
         public String toString() {
             return "Instruction{" +
-                   "left='" + left + '\'' +
-                   ", right='" + right + '\'' +
-                   '}';
+                    "left='" + left + '\'' +
+                    ", right='" + right + '\'' +
+                    '}';
+        }
+    }
+
+    static class Summit {
+        private String node;
+        private long cycle;
+        private int sequenceIndex;
+        private long sequenceNbr;
+
+        public Summit(String node, long cycle, int sequenceIndex, long sequenceNbr) {
+            this.node = node;
+            this.cycle = cycle;
+            this.sequenceIndex = sequenceIndex;
+            this.sequenceNbr = sequenceNbr;
+        }
+
+        @Override
+        public String toString() {
+            return "Summit{" +
+                    "node='" + node + '\'' +
+                    ", cycle=" + cycle +
+                    ", sequenceIndex=" + sequenceIndex +
+                    ", sequenceNbr=" + sequenceNbr +
+                    '}';
+        }
+    }
+
+    static class Cycle {
+        long frequency;
+        long offset;
+
+        public Cycle(long frequency, long offset) {
+            this.frequency = frequency;
+            this.offset = offset;
+        }
+
+        @Override
+        public String toString() {
+            return "Cycle{" +
+                    "frequency=" + frequency +
+                    ", offset=" + offset +
+                    '}';
         }
     }
 

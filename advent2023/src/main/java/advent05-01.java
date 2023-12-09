@@ -1,12 +1,11 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class Scratch {
+class Advent0501 {
     public static void main(String[] args) {
 /*        String puzzle = """
                 seeds: 79 14 55 13
@@ -290,7 +289,7 @@ class Scratch {
                 """;
 
         String[] almanacParts = puzzle.split("\n\n");
-        List<SeedBag> seeds = getSeedList(almanacParts[0]);
+        List<Long> seeds = getSeedList(almanacParts[0]);
         List<Almanac> almanacs = new ArrayList<>();
         for (int i = 1; i < almanacParts.length; i++) {
             almanacs.add(getAlmanac(almanacParts[i]));
@@ -298,33 +297,27 @@ class Scratch {
         Map<String, List<Almanac.Entry>> almanacEntriesByName = almanacs.stream().collect(Collectors.toMap(
                 Almanac::getName,
                 Almanac::getEntries));
-        HashMap<SeedBag, SeedBag> seedsById = new HashMap<>();
-        for (SeedBag seed : seeds) {
+        HashMap<Long, Long> seedsById = new HashMap<>();
+        for (Long seed : seeds) {
             seedsById.put(seed, seed);
         }
 
-        HashMap<SeedBag, SeedBag> soilBySeed = transformValuesFromSourceToDestination(seedsById, almanacEntriesByName.get("seed-to-soil"));
-        HashMap<SeedBag, SeedBag> fertilizerBySeed = transformValuesFromSourceToDestination(soilBySeed, almanacEntriesByName.get("soil-to-fertilizer"));
-        HashMap<SeedBag, SeedBag> waterBySeed = transformValuesFromSourceToDestination(fertilizerBySeed, almanacEntriesByName.get("fertilizer-to-water"));
-        HashMap<SeedBag, SeedBag> lightBySeed = transformValuesFromSourceToDestination(waterBySeed, almanacEntriesByName.get("water-to-light"));
-        HashMap<SeedBag, SeedBag> temperatureBySeed = transformValuesFromSourceToDestination(lightBySeed, almanacEntriesByName.get("light-to-temperature"));
-        HashMap<SeedBag, SeedBag> humidityBySeed = transformValuesFromSourceToDestination(temperatureBySeed, almanacEntriesByName.get("temperature-to-humidity"));
-        HashMap<SeedBag, SeedBag> locationBySeed = transformValuesFromSourceToDestination(humidityBySeed, almanacEntriesByName.get("humidity-to-location"));
+        HashMap<Long, Long> soilBySeed = transformValuesFromSourceToDestination(seedsById, almanacEntriesByName.get("seed-to-soil"));
+        HashMap<Long, Long> fertilizerBySeed = transformValuesFromSourceToDestination(soilBySeed, almanacEntriesByName.get("soil-to-fertilizer"));
+        HashMap<Long, Long> waterBySeed = transformValuesFromSourceToDestination(fertilizerBySeed, almanacEntriesByName.get("fertilizer-to-water"));
+        HashMap<Long, Long> lightBySeed = transformValuesFromSourceToDestination(waterBySeed, almanacEntriesByName.get("water-to-light"));
+        HashMap<Long, Long> temperatureBySeed = transformValuesFromSourceToDestination(lightBySeed, almanacEntriesByName.get("light-to-temperature"));
+        HashMap<Long, Long> humidityBySeed = transformValuesFromSourceToDestination(temperatureBySeed, almanacEntriesByName.get("temperature-to-humidity"));
+        HashMap<Long, Long> locationBySeed = transformValuesFromSourceToDestination(humidityBySeed, almanacEntriesByName.get("humidity-to-location"));
 
         System.out.println(locationBySeed.entrySet());
-        System.out.println(locationBySeed.values().stream().min(Comparator.comparingLong(o -> o.min)));
+        System.out.println(locationBySeed.values().stream().min(Long::compareTo));
 
     }
 
-    static List<SeedBag> getSeedList(String almanacPart) {
+    static List<Long> getSeedList(String almanacPart) {
         String listString = almanacPart.replace("seeds: ", "");
-        List<Long> values = Arrays.stream(listString.split(" ")).map(Long::parseLong).toList();
-        List<SeedBag> seedBags = new ArrayList<>();
-        for (int i = 0; i < values.size(); i = i + 2) {
-            SeedBag seedBag = new SeedBag(values.get(i), values.get(i) + values.get(i + 1) - 1);
-            seedBags.add(seedBag);
-        }
-        return seedBags;
+        return Arrays.asList(listString.split(" ")).stream().map(Long::parseLong).toList();
     }
 
     static Almanac getAlmanac(String almanacPart) {
@@ -339,92 +332,21 @@ class Scratch {
         return new Almanac(name, entries);
     }
 
-    static HashMap<SeedBag, SeedBag> transformValuesFromSourceToDestination(HashMap<SeedBag, SeedBag> seedsBySource, List<Almanac.Entry> almanacEntries) {
-        HashMap<SeedBag, SeedBag> result = new HashMap<>();
-        List<HashMap<SeedBag, SeedBag>> toProcessList = new ArrayList<>(List.of(seedsBySource));
-        int lastEntryIndex = 0;
-        for (int entryIndex = 0; entryIndex < almanacEntries.size(); entryIndex++) {
-            lastEntryIndex = entryIndex;
-            if (toProcessList.size() > entryIndex) {
-                Almanac.Entry almanacEntry = almanacEntries.get(entryIndex);
-                HashMap<SeedBag, SeedBag> toReProcess = new HashMap<>();
-                for (Map.Entry<SeedBag, SeedBag> seedEntry : toProcessList.get(entryIndex).entrySet()) {
-                    if (seedEntry.getValue().min >= almanacEntry.getSource() && seedEntry.getValue().max <= almanacEntry.getSourceMax()) {
-                        SeedBag newBag = new SeedBag(seedEntry.getValue().min - almanacEntry.getDiff(), seedEntry.getValue().max - almanacEntry.getDiff());
-                        seedEntry.setValue(newBag);
-                        result.put(seedEntry.getKey(), seedEntry.getValue());
-                    } else if (seedEntry.getValue().min < almanacEntry.getSource() && seedEntry.getValue().max >= almanacEntry.getSource() && seedEntry.getValue().max <= almanacEntry.getSourceMax()) {
-                        long diff1 = almanacEntry.getSource() - seedEntry.getValue().min - 1;
-                        SeedBag seedBag1Value = new SeedBag(seedEntry.getValue().min, almanacEntry.getSource() - 1);
-                        SeedBag seedBag1Key = new SeedBag(seedEntry.getKey().min, seedEntry.getKey().min + diff1);
-                        toReProcess.put(seedBag1Key, seedBag1Value);
-
-                        long diff2 = seedEntry.getValue().max - almanacEntry.getSource();
-                        SeedBag seedBag2Value = new SeedBag(seedEntry.getValue().max - diff2 - almanacEntry.diff, seedEntry.getValue().max - almanacEntry.diff);
-                        SeedBag seedBag2Key = new SeedBag(seedEntry.getKey().max - diff2 - almanacEntry.diff, seedEntry.getKey().max - almanacEntry.diff);
-                        result.put(seedBag2Key, seedBag2Value);
-                    } else if (seedEntry.getValue().min >= almanacEntry.getSource() && seedEntry.getValue().min <= almanacEntry.getSourceMax() && seedEntry.getValue().max > almanacEntry.getSourceMax()) {
-                        long diff1 = almanacEntry.getSourceMax() - seedEntry.getValue().min;
-                        SeedBag seedBag1Value = new SeedBag(seedEntry.getValue().min - almanacEntry.diff, almanacEntry.getSourceMax() - almanacEntry.diff);
-                        SeedBag seedBag1Key = new SeedBag(seedEntry.getKey().min, seedEntry.getKey().min + diff1);
-                        result.put(seedBag1Key, seedBag1Value);
-
-                        long diff2 = seedEntry.getValue().max - almanacEntry.getSourceMax() - 1;
-                        SeedBag seedBag2Value = new SeedBag(seedEntry.getValue().max - diff2, seedEntry.getValue().max);
-                        SeedBag seedBag2Key = new SeedBag(seedEntry.getKey().max - diff2, seedEntry.getKey().max);
-                        toReProcess.put(seedBag2Key, seedBag2Value);
-
-                    } else if (seedEntry.getValue().min < almanacEntry.getSource() && seedEntry.getValue().max > almanacEntry.getSourceMax()) {
-                        long diff1 = almanacEntry.getSource() - seedEntry.getValue().min - 1;
-                        SeedBag seedBag1Value = new SeedBag(seedEntry.getValue().min, seedEntry.getValue().min + diff1);
-                        SeedBag seedBag1Key = new SeedBag(seedEntry.getKey().min, seedEntry.getKey().min + diff1);
-                        toReProcess.put(seedBag1Key, seedBag1Value);
-
-                        long diff2 = seedEntry.getValue().max - almanacEntry.getSourceMax() - 1;
-                        SeedBag seedBag2Value = new SeedBag(seedEntry.getValue().max - diff2, seedEntry.getValue().max);
-                        SeedBag seedBag2Key = new SeedBag(seedEntry.getKey().max - diff2, seedEntry.getKey().max);
-                        toReProcess.put(seedBag2Key, seedBag2Value);
-
-                        SeedBag seedBag3Value = new SeedBag(seedEntry.getValue().min + diff1 + 1 - almanacEntry.diff, seedEntry.getValue().max - diff2 - 1 - almanacEntry.diff);
-                        SeedBag seedBag3Key = new SeedBag(seedEntry.getKey().min + diff1 + 1, seedEntry.getKey().max - diff2 - 1);
-                        result.put(seedBag3Key, seedBag3Value);
-                    } else toReProcess.put(seedEntry.getKey(), seedEntry.getValue());
+    static HashMap<Long, Long> transformValuesFromSourceToDestination(HashMap<Long, Long> seedsBySource, List<Almanac.Entry> almanacEntries) {
+        HashMap<Long, Long> result = new HashMap<>();
+        HashMap<Long, Long> seeds = (HashMap<Long, Long>) seedsBySource.clone();
+        for (Almanac.Entry almanacEntry : almanacEntries) {
+            List<Map.Entry<Long, Long>> seedEntries = seeds.entrySet().stream().toList();
+            for (Map.Entry<Long, Long> seedEntry : seedEntries) {
+                if (seedEntry.getValue() >= almanacEntry.getSource() && seedEntry.getValue() <= almanacEntry.getSourceMax()) {
+                    seedEntry.setValue(seedEntry.getValue() - almanacEntry.getDiff());
+                    result.put(seedEntry.getKey(), seedEntry.getValue());
+                    seeds.remove(seedEntry.getKey());
                 }
-                toProcessList.add(toReProcess);
             }
-
         }
-        if (!toProcessList.get(lastEntryIndex + 1).isEmpty()) {
-            result.putAll(toProcessList.get(lastEntryIndex + 1));
-        }
-
+        result.putAll(seeds);
         return result;
-    }
-
-    static class SeedBag {
-        long min;
-        long max;
-
-        public SeedBag(long seedMin, long seedMax) {
-            this.min = seedMin;
-            this.max = seedMax;
-        }
-
-        public long getSeedMin() {
-            return min;
-        }
-
-        public long getSeedMax() {
-            return max;
-        }
-
-        @Override
-        public String toString() {
-            return "SeedBag{" +
-                   "min=" + min +
-                   ", max=" + max +
-                   '}';
-        }
     }
 
 

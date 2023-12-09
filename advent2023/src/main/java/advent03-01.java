@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-class Scratch {
+class Advent0301 {
     public static void main(String[] args) {
 /*        String schema = """
                 467..11444

@@ -4,7 +4,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-class Scratch {
+class Advent0702 {
     public static void main(String[] args) {
         /*String input = """
                 32T3K 765
@@ -1150,7 +1150,7 @@ class Scratch {
         }
     }
 
-    static enum Card {
+    enum Card {
         JOKER("J"),
         DEUX("2"),
         TROIS("3"),
@@ -1180,7 +1180,7 @@ class Scratch {
         }
     }
 
-    static enum Type {
+    enum Type {
         HIGH_CARD,
         ONE_PAIR,
         TWO_PAIR,

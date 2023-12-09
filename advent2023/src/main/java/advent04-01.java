@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class Scratch {
+class Advent0401 {
     public static void main(String[] args) {
 //        String code = """
 //                Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53

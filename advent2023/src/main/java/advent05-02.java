@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class Scratch {
+class Advent0502 {
     public static void main(String[] args) {
 /*        String puzzle = """
                 seeds: 79 14 55 13
