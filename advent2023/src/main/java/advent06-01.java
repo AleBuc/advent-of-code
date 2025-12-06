@@ -6,12 +6,8 @@ import java.util.List;
 
 class Advent0601 {
     public static void main(String[] args) {
-        /*String input = """
-                Time:      7  15   30
-                Distance:  9  40  200""";*/
-        String input = """
-                Time:        40     82     91     66
-                Distance:   277   1338   1349   1063""";
+        /*String input = "";*/
+        String input = "";
         
         String[] lines = input.split("\n");
         List<Integer> times = Arrays.stream(lines[0].split(" ")).filter(StringUtils::isNumeric).map(Integer::parseInt).toList();

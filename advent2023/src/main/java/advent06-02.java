@@ -1,11 +1,7 @@
 class Advent0602 {
     public static void main(String[] args) {
-/*        String input = """
-                Time:      71530
-                Distance:  940200""";*/
-        String input = """
-                Time:        40     82     91     66
-                Distance:   277   1338   1349   1063""";
+/*        String input = "";*/
+        String input = "";
 
         String[] lines = input.split("\n");
         long time = Long.parseLong(lines[0].replaceAll("[^\\d.]", ""));
