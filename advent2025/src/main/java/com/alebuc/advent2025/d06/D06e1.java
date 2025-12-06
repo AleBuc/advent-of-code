@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 
 public class D06e1 {
     public static void main(String[] args) {
-//        String fileName = "/ex06.txt";
-        String fileName = "/data06.txt";
+        String fileName = "/ex06.txt";
+//        String fileName = "/data06.txt";
         List<String> contentLines = new ArrayList<>(Utils.readResourceFileAsLines(fileName));
         System.out.println("Content lines: " + contentLines);
 
