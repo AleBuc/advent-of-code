@@ -1,15 +1,11 @@
 package com.alebuc.advent2025.d07;
 
 import com.alebuc.advent2025.utils.Utils;
-import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class D07e1 {
     private static final String START = "S";
