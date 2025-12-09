@@ -10,8 +10,8 @@ import java.util.List;
 
 public class D09e1 {
     public static void main(String[] args) {
-//         String fileName = "/ex09.txt";
-        String fileName = "/data09.txt";
+         String fileName = "/ex09.txt";
+//        String fileName = "/data09.txt";
 
         List<String> contentLines = new ArrayList<>(Utils.readResourceFileAsLines(fileName));
         System.out.println("Content lines: " + contentLines);
@@ -29,7 +29,7 @@ public class D09e1 {
             for (int indexB = indexA + 1; indexB < tiles.size(); indexB++) {
                 Tile tileA = tiles.get(indexA);
                 Tile tileB = tiles.get(indexB);
-                rectangles.add(new Rectangle(tileA, tileB));
+                rectangles.add(new Rectangle(tileA, tileB, true));
             }
         }
         rectangles.sort(Comparator.reverseOrder());
