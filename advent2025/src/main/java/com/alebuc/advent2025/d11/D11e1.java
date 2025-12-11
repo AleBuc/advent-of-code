@@ -4,10 +4,8 @@ import com.alebuc.advent2025.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class D11e1 {
     private static final String YOU = "you";
@@ -15,7 +13,7 @@ public class D11e1 {
 
     public static void main(String[] args) {
         String fileName = "/ex11.txt";
-//        String fileName = "/data11.txt";
+//        String fileName = "/data11.csv";
         List<String> contentLines = new ArrayList<>(Utils.readResourceFileAsLines(fileName));
         System.out.println("Content lines: " + contentLines);
 

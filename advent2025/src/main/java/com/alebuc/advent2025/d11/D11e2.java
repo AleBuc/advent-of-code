@@ -3,10 +3,7 @@ package com.alebuc.advent2025.d11;
 import com.alebuc.advent2025.utils.Utils;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*; // pour Map, HashMap, Set, HashSet
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class D11e2 {
@@ -16,8 +13,8 @@ public class D11e2 {
     private static final String FFT = "fft";
 
     public static void main(String[] args) {
-//        String fileName = "/ex11-2.txt";
-        String fileName = "/data11.txt";
+        String fileName = "/ex11-2.txt";
+//        String fileName = "/data11.txt";
         List<String> contentLines = new ArrayList<>(Utils.readResourceFileAsLines(fileName));
         System.out.println("Content lines: " + contentLines);
 
@@ -47,65 +44,152 @@ public class D11e2 {
         AtomicInteger countFftToOut = new AtomicInteger(0);
         AtomicInteger countDacToSvr = new AtomicInteger(0);
         AtomicInteger countFftToSvr = new AtomicInteger(0);
-        tryToFindTarget(OUT, DAC, mapping, mapping.get(DAC), DAC, new ArrayList<>(), countBetweenDacAndFft, countDacToOut);
-        tryToFindTarget(OUT, FFT, mapping, mapping.get(FFT), FFT, new ArrayList<>(), countBetweenFftAndDac, countFftToOut);
-        tryToFindTarget(SVR, DAC, reversedMapping, reversedMapping.get(DAC), DAC, new ArrayList<>(), countBetweenDacAndFft, countDacToSvr);
-        tryToFindTarget(SVR, FFT, reversedMapping, reversedMapping.get(FFT), FFT, new ArrayList<>(), countBetweenFftAndDac, countFftToSvr);
-        BigInteger svrToDacToFftToOutCount = BigInteger.valueOf(countBetweenDacAndFft.get()).multiply(BigInteger.valueOf(countDacToSvr.get())).multiply(BigInteger.valueOf(countFftToOut.get()));
-        BigInteger svrToFftToDacToOutCount = BigInteger.valueOf(countBetweenFftAndDac.get()).multiply(BigInteger.valueOf(countFftToSvr.get())).multiply(BigInteger.valueOf(countDacToOut.get()));
+
+        Map<MemoKey, MemoValue> memoWaysToOut = new HashMap<>();
+        Map<MemoKey, MemoValue> memoWaysToSvr = new HashMap<>();
+
+        tryToFindTarget(
+                OUT,
+                DAC,
+                mapping,
+                DAC,
+                new HashSet<>(),
+                countBetweenDacAndFft,
+                countDacToOut,
+                memoWaysToOut
+        );
+        tryToFindTarget(
+                OUT,
+                FFT,
+                mapping,
+                FFT,
+                new HashSet<>(),
+                countBetweenFftAndDac,
+                countFftToOut,
+                memoWaysToOut
+        );
+
+        tryToFindTarget(
+                SVR,
+                DAC,
+                reversedMapping,
+                DAC,
+                new HashSet<>(),
+                countBetweenDacAndFft,
+                countDacToSvr,
+                memoWaysToSvr
+        );
+        tryToFindTarget(
+                SVR,
+                FFT,
+                reversedMapping,
+                FFT,
+                new HashSet<>(),
+                countBetweenFftAndDac,
+                countFftToSvr,
+                memoWaysToSvr
+        );
+
+        BigInteger svrToDacToFftToOutCount = BigInteger
+                .valueOf(countBetweenDacAndFft.get())
+                .multiply(BigInteger.valueOf(countDacToSvr.get()))
+                .multiply(BigInteger.valueOf(countFftToOut.get()));
+
+        BigInteger svrToFftToDacToOutCount = BigInteger
+                .valueOf(countBetweenFftAndDac.get())
+                .multiply(BigInteger.valueOf(countFftToSvr.get()))
+                .multiply(BigInteger.valueOf(countDacToOut.get()));
+
         return svrToDacToFftToOutCount.add(svrToFftToDacToOutCount);
     }
-    //TODO tests de rencontre
 
     private static void tryToFindTarget(String target,
                                         String init,
                                         Map<String, List<String>> mapping,
-                                        List<String> choices,
                                         String currentPosition,
-                                        List<String> visitedPositions,
+                                        Set<String> visitedPositions,
                                         AtomicInteger countBetweenDacAndFft,
-                                        AtomicInteger countToTarget) {
-        if (choices.contains(target)) {
-            countToTarget.incrementAndGet();
-            List<String> route = new ArrayList<>(visitedPositions);
-            route.add(currentPosition);
-            route.add(target);
-            System.out.println(route);
+                                        AtomicInteger countToTarget,
+                                        Map<MemoKey, MemoValue> memo) {
+
+        MemoKey key = new MemoKey(target, init, currentPosition);
+        MemoValue cached = memo.get(key);
+        if (cached != null) {
+            countToTarget.addAndGet(cached.countToTarget());
+            countBetweenDacAndFft.addAndGet(cached.countBetweenDacAndFft());
             return;
         }
-        if (target.equals(OUT)) {
+
+        List<String> choices = mapping.get(currentPosition);
+        if (choices == null || choices.isEmpty()) {
+            memo.put(key, new MemoValue(0, 0));
+            return;
+        }
+
+        int localCountToTarget = 0;
+        int localCountBetweenDacAndFft = 0;
+        if (choices.contains(target)) {
+            localCountToTarget++;
+            if (OUT.equals(target)) {
+                if (currentPosition.equals(DAC) && init.equals(FFT)) {
+                    localCountBetweenDacAndFft++;
+                } else if (currentPosition.equals(FFT) && init.equals(DAC)) {
+                    localCountBetweenDacAndFft++;
+                }
+            }
+            countToTarget.incrementAndGet();
+            countBetweenDacAndFft.addAndGet(localCountBetweenDacAndFft);
+
+            memo.put(key, new MemoValue(localCountToTarget, localCountBetweenDacAndFft));
+            return;
+        }
+
+        if (OUT.equals(target)) {
             if (currentPosition.equals(DAC) && init.equals(FFT)) {
+                localCountBetweenDacAndFft++;
                 countBetweenDacAndFft.incrementAndGet();
+                memo.put(key, new MemoValue(0, localCountBetweenDacAndFft));
                 return;
             } else if (currentPosition.equals(FFT) && init.equals(DAC)) {
+                localCountBetweenDacAndFft++;
                 countBetweenDacAndFft.incrementAndGet();
+                memo.put(key, new MemoValue(0, localCountBetweenDacAndFft));
                 return;
             }
         }
-        if (target.equals(SVR)) {
-            if (currentPosition.equals(DAC) && init.equals(FFT)) {
-                return;
-            } else if (currentPosition.equals(FFT) && init.equals(DAC)) {
+        if (SVR.equals(target)) {
+            if ((currentPosition.equals(DAC) && init.equals(FFT))
+                || (currentPosition.equals(FFT) && init.equals(DAC))) {
+                memo.put(key, new MemoValue(0, 0));
                 return;
             }
         }
 
         for (String choice : choices) {
-            if (visitedPositions.contains(choice)) {
+            if (!visitedPositions.add(choice)) {
                 continue;
             }
-            List<String> newVisitedPositions = new ArrayList<>(visitedPositions);
-            newVisitedPositions.add(currentPosition);
-            tryToFindTarget(target,
+            int beforeCountToTarget = countToTarget.get();
+            int beforeCountBetween = countBetweenDacAndFft.get();
+
+            tryToFindTarget(
+                    target,
                     init,
                     mapping,
-                    mapping.get(choice),
                     choice,
-                    newVisitedPositions,
+                    visitedPositions,
                     countBetweenDacAndFft,
-                    countToTarget
+                    countToTarget,
+                    memo
             );
+            int deltaToTarget = countToTarget.get() - beforeCountToTarget;
+            int deltaBetween = countBetweenDacAndFft.get() - beforeCountBetween;
+            localCountToTarget += deltaToTarget;
+            localCountBetweenDacAndFft += deltaBetween;
+
+            visitedPositions.remove(choice);
         }
+        memo.put(key, new MemoValue(localCountToTarget, localCountBetweenDacAndFft));
     }
 
 }
