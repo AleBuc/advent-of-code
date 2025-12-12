@@ -8,6 +8,13 @@ import lombok.ToString;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Rectangular region to be tiled and the multiset of required shapes.
+ * <p>
+ * Parses a single line of the form: {@code WxH: c0 c1 c2 ...}
+ * where {@code W} and {@code H} are width and height, and {@code cK} is the count
+ * for shape index {@code K}.
+ */
 @Getter
 @EqualsAndHashCode
 @ToString
@@ -18,6 +25,11 @@ public class Region {
     @Setter
     private boolean allShapesFittable = false;
 
+    /**
+     * Construct a region from a single instruction line.
+     *
+     * @param instruction e.g. {@code "5x4: 2 0 1"}
+     */
     public Region(String instruction) {
         String[] instructions = instruction.split(":");
         String[] dimensions = instructions[0].split("x");
@@ -31,8 +43,17 @@ public class Region {
         this.shapeNumberByIndex = shapes;
     }
 
-    public void setAllShapesFittable(Map<Integer, Shape> shapeByIndex) {
-        DlxSolver solver = new DlxSolver();
-        this.allShapesFittable = solver.isFittable(this, shapeByIndex);
+    /**
+     * @return total number of cells in the region (W×H)
+     */
+    public int area() {
+        return width * length;
+    }
+
+    /**
+     * @return the smaller of width and height (useful for quick fit checks)
+     */
+    public int minDimension() {
+        return Math.min(width, length);
     }
 }
